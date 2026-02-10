@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - TaskFlow</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        /* Projects Page Specific Styles */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            padding-bottom: 80px;
+            /* Space for FAB */
+        }
+
+        .project-card {
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Completed project styling */
+        .project-card.completed {
+            opacity: 0.75;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .project-card.completed::after {
+            content: '✓ Completed';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Card Color Themes */
+        .theme-purple {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+        }
+
+        .theme-blue {
+            background: linear-gradient(135deg, #dbeafe 0%, #ffffff 100%);
+        }
+
+        .theme-green {
+            background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%);
+        }
+
+        .theme-orange {
+            background: linear-gradient(135deg, #ffedd5 0%, #ffffff 100%);
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .project-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 6px;
+            font-size: 12px;
+        }
+
+        .progress-percent {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .task-count {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Status Colors - Semantic */
+        .status-pill.not-started {
+            background: rgba(107, 114, 128, 0.1);
+            color: #4b5563;
+        }
+
+        .status-pill.in-progress {
+            background: rgba(251, 191, 36, 0.15);
+            color: #d97706;
+        }
+
+        .status-pill.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Progress bar colors - semantic */
+        .fill-gray {
+            background: #d1d5db;
+        }
+
+        .fill-red {
+            background: #ef4444;
+        }
+
+        .fill-yellow {
+            background: #f59e0b;
+        }
+
+        .fill-green {
+            background: #10b981;
+        }
+
+        .fill-purple {
+            background: #6366f1;
+        }
+
+        .fill-blue {
+            background: #3b82f6;
+        }
+
+        .fill-orange {
+            background: #f59e0b;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .team-avatars {
+            display: flex;
+        }
+
+        .team-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: #cbd5e1;
+            margin-right: -8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Health Indicator */
+        .health-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .health-good {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .health-ok {
+            background: rgba(251, 191, 36, 0.1);
+            color: #d97706;
+        }
+
+        .health-warning {
+            background: rgba(249, 115, 22, 0.1);
+            color: #ea580c;
+        }
+
+        .health-critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .health-none {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+
+        .health-icon {
+            font-size: 12px;
+        }
+
+        .health-label {
+            font-size: 10px;
+        }
+
+        .meta-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .date-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 12px;
+        }
+
+        .date-icon {
+            font-size: 11px;
+        }
+
+        .date-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .date-overdue {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .date-overdue .date-text {
+            color: #dc2626;
+        }
+
+        /* Overdue card styling */
+        .card-overdue {
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.05);
+        }
+
+        /* Card header section */
+        .card-header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        /* Priority badge - moved to top right */
+        .priority-badge {
+            font-size: 9px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .priority-med {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .priority-low {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .progress-section {
+            margin-top: auto;
+        }
+
+        /* Actions */
+        .card-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .project-card:hover .card-actions {
+            opacity: 1;
+        }
+
+        /* Always show on touch devices */
+        @media (hover: none) {
+            .card-actions {
+                opacity: 0.7;
+            }
+            
+            .card-actions:hover {
+                opacity: 1;
+            }
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.95);
+        }
+
+        /* Filter Bar - Matching Tasks Page */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-dropdown {
+            padding: 8px 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 50px;
+            background: #e0e7ff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-dropdown:hover {
+            background: #c7d2fe;
+        }
+
+        .filter-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6b7280;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+
+        .btn-add-task {
+            padding: 10px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add-task:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .view-toggle-btn {
+            padding: 6px 10px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #6b7280;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-main);
+        }
+
+        .view-toggle-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Projects Stats */
+        .projects-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left: 3px solid #6366f1;
+        }
+
+        .stat-item.stat-delayed {
+            border-left-color: #ef4444;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* List View */
+        .projects-list {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .list-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 100px 120px 100px 120px 80px;
+            gap: 16px;
+            padding: 12px 20px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+        }
+
+        .list-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 100px 120px 100px 120px 80px;
+            gap: 16px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background 0.2s;
+            align-items: center;
+        }
+
+        .list-row:hover {
+            background: #f9fafb;
+        }
+
+        .list-row:last-child {
+            border-bottom: none;
+        }
+
+        .list-project-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .list-project-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .list-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .list-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: #f3f4f6;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .list-progress-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .list-progress-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            min-width: 35px;
+        }
+
+        /* Quick Actions Menu */
+        .quick-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 20;
+        }
+
+        .project-card:hover .quick-actions,
+        .list-row:hover .quick-actions {
+            opacity: 1;
+        }
+
+        .actions-trigger {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .actions-trigger:hover {
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .actions-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            min-width: 160px;
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+        }
+
+        .actions-menu.active {
+            display: block;
+        }
+
+        .action-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-item:hover {
+            background: #f9fafb;
+        }
+
+        .action-item.danger {
+            color: #ef4444;
+        }
+
+        .action-item.danger:hover {
+            background: #fef2f2;
+        }
+
+        /* Task Distribution */
+        .task-distribution {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .task-dist-item {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .task-dist-todo {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+
+        .task-dist-progress {
+            background: rgba(251, 191, 36, 0.15);
+            color: #d97706;
+        }
+
+        .task-dist-done {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+
+        /* Team Members */
+        .team-members {
+            display: flex;
+            align-items: center;
+        }
+
+        .member-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-right: -8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .member-more {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-right: 0;
+        }
+
+        .unassigned-label {
+            font-size: 11px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="logo" style="text-decoration:none; color:inherit;">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="12" stroke="#6366F1" stroke-width="2" />
+            </svg>
+            <span>TaskFlow</span>
+        </a>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <span>Dashboard</span>
+            </a>
+            <a href="tasks.html" class="nav-item">
+                <span>Tasks</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <span>Projects</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+                <span>Calendar</span>
+            </a>
+            <a href="notifications.html" class="nav-item">
+                <span>Notifications</span>
+            </a>
+        </nav>
+
+        <div class="nav-item" id="logoutBtn" style="margin-top: auto; color: #ef4444;">
+            <span>Log Out</span>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <h2 class="header-title">Projects</h2>
+
+            <div class="header-right" style="gap: 16px;">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search projects...">
+                </div>
+
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatarName">U</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <select id="filterStatus" class="filter-dropdown">
+                <option value="all">Status: All</option>
+                <option value="not-started">Not Started</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+
+            <select id="filterPriority" class="filter-dropdown">
+                <option value="all">Priority: All</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+
+            <select id="sortBy" class="filter-dropdown">
+                <option value="dueDate">Sort: Due Date</option>
+                <option value="progress">Sort: Progress</option>
+                <option value="priority">Sort: Priority</option>
+                <option value="updated">Sort: Recently Updated</option>
+            </select>
+
+            <label class="checkbox-label">
+                <input type="checkbox" id="showCompleted" checked>
+                <span>Show Completed</span>
+            </label>
+
+            <div style="margin-left: auto;">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" data-view="grid" title="Grid View">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="1" width="6" height="6" rx="1"/>
+                            <rect x="9" y="1" width="6" height="6" rx="1"/>
+                            <rect x="1" y="9" width="6" height="6" rx="1"/>
+                            <rect x="9" y="9" width="6" height="6" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="view-toggle-btn" data-view="list" title="List View">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="2" width="14" height="2" rx="1"/>
+                            <rect x="1" y="7" width="14" height="2" rx="1"/>
+                            <rect x="1" y="12" width="14" height="2" rx="1"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="projects-stats">
+            <div class="stat-item">
+                <span class="stat-value" id="stats-total">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="stats-active">0</span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="stats-completed">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-item stat-delayed">
+                <span class="stat-value" id="stats-delayed">0</span>
+                <span class="stat-label">Delayed</span>
+            </div>
+        </div>
+
+        <!-- Projects View -->
+        <div class="dashboard-view">
+
+            <div class="projects-grid" id="projectsGrid">
+                <!-- Project Cards injected here -->
+            </div>
+
+        </div>
+
+        <!-- Floating Add Button -->
+        <div class="fab-add" id="addProjectBtn"
+            style="background: linear-gradient(135deg, #a78bfa 0%, #818cf8 100%); width: auto; height: auto; border-radius: 50px; padding: 12px 24px; font-size: 14px; font-weight: 600; bottom: 32px; right: 32px;">
+            Create Project</div>
+
+        <!-- Add/Edit Project Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal" style="width: 500px;">
+                <div class="modal-header">
+                    <div class="modal-title" id="modalTitle">Create Project</div>
+                    <button class="close-btn" id="closeModalBtn">×</button>
+                </div>
+                <form id="projectForm">
+                    <input type="hidden" id="projectId">
+                    <div class="form-field">
+                        <label>Project Name</label>
+                        <input type="text" id="inputTitle" required placeholder="e.g. Mobile App Redesign">
+                    </div>
+                    <div class="form-field">
+                        <label>Description</label>
+                        <input type="text" id="inputDesc" placeholder="Brief description...">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-field">
+                            <label>Priority</label>
+                            <select id="inputPriority">
+                                <option value="High">High</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Color Theme</label>
+                            <select id="inputTheme">
+                                <option value="purple">Purple</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="orange">Orange</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Due Date</label>
+                        <input type="date" id="inputDate" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Save Project</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/projects.js"></script>
+</body>
+
+</html>

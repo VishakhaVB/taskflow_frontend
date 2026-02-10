@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - TaskFlow</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        /* --- Calendar Specific Styles --- */
+
+        .calendar-layout {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Main Calendar Container */
+        .calendar-container {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Header Navigation */
+        .calendar-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f3f4f6;
+            padding: 6px 16px;
+            border-radius: 50px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #e5e7eb;
+            color: var(--text-main);
+        }
+
+        .current-month {
+            font-weight: 700;
+            color: var(--text-main);
+            min-width: 140px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        /* Grid System */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: auto;
+            /* Header row auto-sized */
+            gap: 1px;
+            background: var(--border-light);
+            /* Borders via gap */
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .day-header {
+            text-align: center;
+            background: #f9fafb;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .day-cell {
+            background: white;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 100px;
+            max-height: 140px;
+            overflow-y: auto;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .day-cell:hover {
+            background: #fdfbff;
+        }
+
+        .day-cell.other-month {
+            background: #fafafa;
+            color: #e5e7eb;
+        }
+
+        .day-number {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .day-cell.today .day-number {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Task Pills */
+        .cal-task {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            margin-bottom: 2px;
+            transition: transform 0.1s;
+        }
+
+        .cal-task:hover {
+            transform: scale(1.02);
+            z-index: 2;
+        }
+
+        .task-high {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 3px solid #ef4444;
+        }
+
+        .task-medium {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .task-low {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 3px solid #10b981;
+        }
+
+        .completed-task {
+            opacity: 0.6;
+            text-decoration: line-through;
+            background: #f3f4f6;
+            color: #6b7280;
+            border-left: 3px solid #9ca3af;
+        }
+        
+        /* Project Deadline Pills */
+        .cal-project {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+            margin-bottom: 2px;
+            transition: transform 0.1s;
+            border-left: 3px solid;
+        }
+        
+        .cal-project:hover {
+            transform: scale(1.02);
+            z-index: 2;
+        }
+        
+        .proj-high {
+            background: rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+            border-left-color: #ef4444;
+        }
+        
+        .proj-medium {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1e40af;
+            border-left-color: #3b82f6;
+        }
+        
+        .proj-low {
+            background: rgba(107, 114, 128, 0.15);
+            color: #374151;
+            border-left-color: #6b7280;
+        }
+
+        .more-ind {
+            font-size: 10px;
+            color: var(--text-muted);
+            padding-left: 4px;
+        }
+
+        /* --- Side Panel --- */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+            padding-right: 4px;
+            /* Scrollbar space */
+        }
+
+        .panel-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mini-task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mini-task-card {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mini-task-card:hover {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Project cards in sidebar */
+        .mini-task-card.project-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 3px solid var(--primary);
+        }
+
+        .mini-task-card.project-card:hover {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .mini-task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .mini-task-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.3;
+        }
+
+        .mini-task-priority {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .mini-task-priority.high {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .mini-task-priority.medium {
+            color: #f59e0b;
+            background: #fef3c7;
+        }
+
+        .mini-task-priority.low {
+            color: #10b981;
+            background: #d1fae5;
+        }
+
+        .mini-task-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .mini-task-type {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .mini-task-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .empty-msg {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .calendar-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
+            }
+
+            .calendar-grid {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar (Shared Structure) -->
+    <aside class="sidebar">
+        <a href="index.html" class="logo" style="text-decoration:none; color:inherit;">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="12" stroke="#6366F1" stroke-width="2" />
+            </svg>
+            <span>TaskFlow</span>
+        </a>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <span>Dashboard</span>
+            </a>
+            <a href="tasks.html" class="nav-item">
+                <span>Tasks</span>
+            </a>
+            <a href="projects.html" class="nav-item">
+                <span>Projects</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <span>Calendar</span>
+            </a>
+            <a href="notifications.html" class="nav-item">
+                <span>Notifications</span>
+            </a>
+        </nav>
+
+        <div class="nav-item" id="logoutBtn" style="margin-top: auto; color: #ef4444;">
+            <span>Log Out</span>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <h2 class="header-title">Calendar</h2>
+            <div class="header-right">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatarName">U</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Calendar View -->
+        <div class="dashboard-view">
+            <div class="calendar-layout">
+
+                <!-- Main Grid -->
+                <div class="calendar-container">
+                    <div class="calendar-header-row">
+                        <div class="month-nav">
+                            <button class="nav-btn" id="prevMonth">‹</button>
+                            <span class="current-month" id="monthDisplay">January 2026</span>
+                            <button class="nav-btn" id="nextMonth">›</button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Headers -->
+                        <div class="day-header">Sun</div>
+                        <div class="day-header">Mon</div>
+                        <div class="day-header">Tue</div>
+                        <div class="day-header">Wed</div>
+                        <div class="day-header">Thu</div>
+                        <div class="day-header">Fri</div>
+                        <div class="day-header">Sat</div>
+                        <!-- Days injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Right Panel -->
+                <div class="side-panel">
+                    <div class="panel-card">
+                        <div class="panel-title">📅 Today's Focus</div>
+                        <div class="mini-task-list" id="todayList"></div>
+                    </div>
+
+                    <div class="panel-card" style="flex:1;">
+                        <div class="panel-title">🚀 Upcoming</div>
+                        <div class="mini-task-list" id="upcomingList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task FAB -->
+        <div class="fab-add" id="addTaskBtn">+</div>
+
+        <!-- Shared Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title" id="modalTitle">New Task</div>
+                    <button class="close-btn" id="closeModalBtn">×</button>
+                </div>
+                <form id="taskForm">
+                    <div class="form-field">
+                        <label>Task Title</label>
+                        <input type="text" id="inputTitle" required placeholder="What needs to be done?">
+                    </div>
+                    <div class="form-field">
+                        <label>Status</label>
+                        <select id="inputStatus">
+                            <option value="To Do">To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Priority</label>
+                        <select id="inputPriority">
+                            <option value="High">High</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Due Date</label>
+                        <input type="date" id="inputDate" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Save Task</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Logic -->
+    <script src="../js/api.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/calendar.js"></script>
+</body>
+
+</html>

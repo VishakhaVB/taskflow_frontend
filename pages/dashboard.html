@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TaskFlow</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- FontAwesome for Icons (Optional, using SVG/Text for now to keep pure) -->
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="logo" style="text-decoration:none; color:inherit;">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="12" stroke="#6366F1" stroke-width="2" />
+            </svg>
+            <span>TaskFlow</span>
+        </a>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <span>Dashboard</span>
+            </a>
+            <a href="tasks.html" class="nav-item">
+                <span>Tasks</span>
+            </a>
+            <a href="projects.html" class="nav-item">
+                <span>Projects</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+                <span>Calendar</span>
+            </a>
+            <a href="notifications.html" class="nav-item">
+                <span>Notifications</span>
+            </a>
+        </nav>
+
+        <div class="nav-item" id="logoutBtn" style="margin-top: auto; color: #ef4444;">
+            <span>Log Out</span>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <h2 class="header-title">Dashboard</h2>
+
+            <div class="header-right">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search...">
+                </div>
+
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatarName">U</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <div class="dashboard-view">
+
+            <!-- Stats Row -->
+            <div class="stats-grid">
+                <div class="stat-card card-purple">
+                    <div class="stat-icon icon-purple">📝</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-card card-green">
+                    <div class="stat-icon icon-green">✅</div>
+                    <div class="stat-value" id="stat-completed">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card card-blue">
+                    <div class="stat-icon icon-blue">📊</div>
+                    <div class="stat-value" id="stat-projects">0</div>
+                    <div class="stat-label">Active Projects</div>
+                </div>
+                <div class="stat-card card-orange">
+                    <div class="stat-icon icon-orange">⚡</div>
+                    <div class="stat-value" id="stat-progress">0</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+            </div>
+
+            <!-- Main Grid (Kanban + Analytics) -->
+            <div class="dashboard-main-grid">
+                <!-- Projects Overview (Left Column) -->
+                <div class="projects-section">
+                    <div class="section-header"
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 class="section-title" style="font-size:16px; font-weight:700;">Active Projects</h3>
+                        <a href="projects.html" style="font-size:12px; color:var(--primary); text-decoration:none;">View
+                            All</a>
+                    </div>
+                    <div class="mini-project-list" id="miniProjectList"
+                        style="display:flex; flex-direction:column; gap:12px;">
+                        <!-- Injected via JS -->
+                        <div class="empty-state">Loading projects...</div>
+                    </div>
+                </div>
+
+                <!-- Kanban Board (Right Column) -->
+                <div class="kanban-section">
+                    <!-- Simple 3-Col Kanban -->
+                    <div class="kanban-board">
+                        <!-- To Do -->
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span class="column-title">To Do</span>
+                                <span class="task-count" id="count-todo">0</span>
+                            </div>
+                            <div class="task-list" id="list-todo">
+                                <!-- Tasks injected here -->
+                                <div class="empty-state">No tasks yet</div>
+                            </div>
+                        </div>
+
+                        <!-- In Progress -->
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span class="column-title">In Progress</span>
+                                <span class="task-count" id="count-inprogress">0</span>
+                            </div>
+                            <div class="task-list" id="list-inprogress">
+                                <!-- Tasks injected here -->
+                                <div class="empty-state">No active tasks</div>
+                            </div>
+                        </div>
+
+                        <!-- Completed -->
+                        <div class="kanban-column">
+                            <div class="column-header">
+                                <span class="column-title">Completed</span>
+                                <span class="task-count" id="count-completed">0</span>
+                            </div>
+                            <div class="task-list" id="list-completed">
+                                <!-- Tasks injected here -->
+                                <div class="empty-state">No completed tasks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Floating Add Button -->
+        <div class="fab-add" id="fabBtn">+</div>
+        
+        <!-- Quick Action Menu -->
+        <div class="quick-action-menu" id="quickActionMenu">
+            <div class="quick-action-item task" id="quickAddTask">
+                <div class="quick-action-icon">📝</div>
+                <div class="quick-action-label">Add Task</div>
+            </div>
+            <div class="quick-action-item project" id="quickAddProject">
+                <div class="quick-action-icon">📁</div>
+                <div class="quick-action-label">Add Project</div>
+            </div>
+            <div class="quick-action-item reminder" id="quickAddReminder">
+                <div class="quick-action-icon">⏰</div>
+                <div class="quick-action-label">Add Reminder</div>
+            </div>
+        </div>
+
+        <!-- Add Task Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">Add New Task</div>
+                    <button class="close-btn" id="closeModalBtn">×</button>
+                </div>
+                <form id="taskForm">
+                    <div class="form-field">
+                        <label>Task Title</label>
+                        <input type="text" id="inputTitle" required placeholder="Enter task name...">
+                    </div>
+                    <div class="form-field">
+                        <label>Priority</label>
+                        <select id="inputPriority">
+                            <option value="High">High</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Due Date</label>
+                        <input type="date" id="inputDate" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Create Task</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+
+</html>
