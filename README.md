@@ -6,7 +6,8 @@ A clean, responsive frontend for **TaskFlow**, a task and project management sys
 
 ## 🌍 Live Demo
 
-**Frontend:** Coming soon (link will be added)
+**Frontend:** https://taskflow-frontend-nu-jade.vercel.app/
+
 **Backend (API):** https://taskflow-backend-xoq1.onrender.com
 
 ---
@@ -17,7 +18,10 @@ A clean, responsive frontend for **TaskFlow**, a task and project management sys
 
 | Dashboard | Projects | Tasks |
 |---|---|---|
-| ![Dashboard](./assets/screenshots/dashboard.png) | ![Projects](./assets/screenshots/projects.png) | ![Tasks](./assets/screenshots/tasks.png) |
+| ![Dashboard](<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/b0017de1-f31a-443a-adea-3d376deba7fe" />
+) | ![Projects](<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/2d6713ef-1bec-4c3e-9277-a216aeae9856" />
+) | ![Tasks](<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/c9bfb1f3-bd67-4d29-b37c-f1762596494c" />
+) |
 
 ---
 
