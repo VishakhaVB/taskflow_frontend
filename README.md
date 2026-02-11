@@ -158,8 +158,10 @@ This project is licensed under the **MIT License**.
 
 ## 👩‍💻 Author and Contact
 
-**Vishakha Bhilwadkar**
+**Vishakha Bhilwadkar** 
+
 GitHub: https://github.com/VishakhaVB
+
 Email: vishakhabhilwadkar@gmail.com
 
 ---
