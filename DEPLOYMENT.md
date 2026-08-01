@@ -6,6 +6,7 @@
 - **New file:** `frontend/index.html` (at root level)
 - Added proper HTML structure: `<!DOCTYPE html>`, `<html>`, `<head>`, `<body>`
 - Updated all paths:
+- 
   - Scripts: `../js/` → `js/`
   - Links to pages: `create_account.html` → `pages/create_account.html`
   - Added anchor links for Features and About sections
