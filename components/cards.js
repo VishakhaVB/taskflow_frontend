@@ -1,6 +1,6 @@
 /**
  * Card Component
- * Reusable card structures for tasks, projects, etc.
+ * Reusable card structures for tasks, projects,, etc.
  */
 
 class TaskCard {
