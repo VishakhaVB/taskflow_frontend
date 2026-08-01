@@ -1,6 +1,6 @@
 /**
  * TaskFlow Application Logic
- * Handles Firebase Authentication, Firestore Integration, and Dashboard Logic
+ * Handles Firebase Authentication, Firestore Integration, and Dashboard , Logic
  */
 
 console.log("App.js: Script loaded and executing.");
